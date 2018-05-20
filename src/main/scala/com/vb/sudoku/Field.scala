@@ -58,6 +58,20 @@ object Field {
     new Field(initialCells)
   }
 
+  def apply(values: Array[Int]): Field = {
+    def toRowCol(index: Int, size: Int): (Int, Int) = {
+      (index / size, index % size)
+    }
+    val size = Math.sqrt(values.length).toInt
+    val cells = values.zipWithIndex.map(value => {
+      val position = toRowCol(value._2, size)
+      val cellValue = if (value._1 > 0) Some(value._1) else None
+      val availableValues = if (value._1 > 0) (for (i <- 1 to size if i != value._1) yield i).toArray else (for (i <- 1 to size) yield i).toArray
+      Cell(position._1, position._2, cellValue, availableValues, resolveSector(position._1, position._2, size))
+    })
+    new Field(cells)
+  }
+
   def apply(str: String): Field = {
     val values = str.split(" ").map(_.toInt)
     val size = Math.sqrt(values.length).toInt
