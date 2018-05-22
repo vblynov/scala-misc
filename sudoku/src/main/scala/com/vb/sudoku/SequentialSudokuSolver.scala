@@ -1,6 +1,5 @@
 package com.vb.sudoku
 
-//Test
 class SequentialSudokuSolver extends SudokuSolver {
   override def solve(sudoku: Field): Field = {
     if (sudoku.isWrong || sudoku.isSolved) {
