@@ -1,7 +1,7 @@
-package com.vb.sudoku
+package com.vb.sudoku.impl
 
-import org.scalacheck.{Gen, Prop, Test}
 import org.scalacheck.commands.Commands
+import org.scalacheck.{Gen, Prop, Test}
 
 import scala.util.{Success, Try}
 
