@@ -6,7 +6,8 @@ version in ThisBuild := "0.1"
 lazy val root = project
   .in(file("."))
   .aggregate(
-    sudoku
+    sudoku,
+    jmh
   )
 
 lazy val sudoku = project
@@ -14,6 +15,14 @@ lazy val sudoku = project
     name := "sudoku",
     libraryDependencies ++= commonDependencies
   )
+
+lazy val jmh = project
+  .dependsOn(sudoku)
+  .enablePlugins(JmhPlugin)
+  .settings(
+    name := "jmh"
+  )
+
 
 lazy val dependencies =
   new {
