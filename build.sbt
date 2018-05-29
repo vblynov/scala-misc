@@ -7,6 +7,7 @@ lazy val root = project
   .in(file("."))
   .aggregate(
     sudoku,
+    nonogram,
     jmh
   )
 
@@ -14,6 +15,12 @@ lazy val sudoku = project
   .settings(
     name := "sudoku",
     libraryDependencies ++= commonDependencies
+  )
+
+lazy val nonogram = project
+  .settings(
+    name := "nonogram",
+    libraryDependencies ++= (commonDependencies :+ ("org.scala-lang.modules" %% "scala-swing" % "2.0.0-M2"))
   )
 
 lazy val jmh = project
