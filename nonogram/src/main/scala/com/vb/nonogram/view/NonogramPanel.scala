@@ -6,31 +6,35 @@ import com.vb.nonogram.impl.{Cell, NonogramField}
 
 import scala.swing.Panel
 
-class NonogramPanel(field: NonogramField) extends Panel {
+class NonogramPanel(val field: NonogramField, val squareSize: Int) extends Panel {
 
   override def paintComponent(canvas: Graphics2D) {
-    val squareSize = 20//canvas.getClipBounds.width.toFloat / field.getRows
+    val canvasWidth = canvas.getClipBounds.width
+    val canvasHeight = canvas.getClipBounds.height
 
-    val x0 = 200
-    val y0 = 200
+    val maxRowGroupSize = (for (i <- 0 until field.rows) yield field.rowGroup(i).length).max
+    val maxColGroupSize = (for (i <- 0 until field.cols) yield field.colGroup(i).length).max
+
+    val x0 = 10 + maxColGroupSize * squareSize
+    val y0 = 10 + maxRowGroupSize * squareSize
 
     // horizontal lines
-    for {i <- 0 to field.getRows} {
+    for {i <- 0 to field.rows} {
       canvas.setStroke(new BasicStroke())
       canvas.setColor(Color.BLACK)
-      canvas.draw(new Line2D.Double(x0, y0 + i * squareSize, x0 + field.getCols * squareSize ,y0 + i * squareSize))
+      canvas.draw(new Line2D.Double(x0, y0 + i * squareSize, x0 + field.cols * squareSize ,y0 + i * squareSize))
     }
 
     //vertical lines
-    for {i <- 0 to field.getCols} {
+    for {i <- 0 to field.cols} {
       canvas.setStroke(new BasicStroke())
       canvas.setColor(Color.BLACK)
-      canvas.draw(new Line2D.Double(x0 + i * squareSize, y0, x0 + i * squareSize, y0 + field.getRows * squareSize))
+      canvas.draw(new Line2D.Double(x0 + i * squareSize, y0, x0 + i * squareSize, y0 + field.rows * squareSize))
     }
 
     //row groups
-    for (i <- 0 until field.getRows) {
-      val group = field.getRowGroup(i).reverse
+    for (i <- 0 until field.rows) {
+      val group = field.rowGroup(i).reverse
       canvas.setColor(Color.BLACK)
       for (j <- group.indices) {
         canvas.drawString(group(j).toString, (x0 - 8 - squareSize/2) - j * squareSize, (y0 + 4 + squareSize/2) + i * squareSize)
@@ -38,8 +42,8 @@ class NonogramPanel(field: NonogramField) extends Panel {
     }
 
     //col groups
-    for (i <- 0 until field.getCols) {
-      val group = field.getColGroup(i).reverse
+    for (i <- 0 until field.cols) {
+      val group = field.colGroup(i).reverse
       canvas.setColor(Color.BLACK)
       for (j <- group.indices) {
         canvas.drawString(group(j).toString, x0 + i * squareSize, (y0 - squareSize/2) - j * squareSize)
@@ -48,12 +52,12 @@ class NonogramPanel(field: NonogramField) extends Panel {
 
     // fill squares
     for {
-      i <- 0 until field.getRows
-      j <- 0 until field.getCols
+      i <- 0 until field.rows
+      j <- 0 until field.cols
       x1 = x0 + j * squareSize
       y1 = y0 + i * squareSize
     } {
-      field.getCell(i, j) match {
+      field.cell(i, j) match {
         case Cell.FILLED => canvas.setColor(Color.BLACK)
         case Cell.EMPTY => canvas.setColor(Color.WHITE)
         case Cell.EXCLUDED => canvas.setColor(Color.GRAY)
@@ -61,4 +65,5 @@ class NonogramPanel(field: NonogramField) extends Panel {
       canvas.fillRect(x1 + 1, y1 + 1, squareSize - 1, squareSize - 1)
     }
   }
+
 }

@@ -7,10 +7,10 @@ import scala.swing.{Dimension, MainFrame, SimpleSwingApplication}
 
 object NonogramSolverApp extends SimpleSwingApplication {
 
-  val data = NonogramField(35, 30)
+  val data = NonogramField("small1.txt")
 
   def top: MainFrame = new MainFrame {
-    contents = new NonogramPanel(data) {
+    contents = new NonogramPanel(data, 20) {
       preferredSize = new Dimension(1000, 1000)
     }
   }
