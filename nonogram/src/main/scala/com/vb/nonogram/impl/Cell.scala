@@ -1,5 +1,3 @@
 package com.vb.nonogram.impl
 
-object Cell extends Enumeration {
-  val EMPTY, FILLED, EXCLUDED = Value
-}
+case class Cell(row: Int, col: Int, filled: Boolean = false)

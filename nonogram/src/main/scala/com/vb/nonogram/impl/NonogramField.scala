@@ -1,50 +1,56 @@
 package com.vb.nonogram.impl
 
+import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
-import scala.util.Random
 
-class NonogramField private[NonogramField](private val body: Array[Array[Cell.Value]],
-                                           private val rowGroups: Array[Array[Int]],
-                                           private val colGroups: Array[Array[Int]]) {
+class NonogramField private[NonogramField](val rows: Int,
+                                           val cols: Int,
+                                           private val body: ArrayBuffer[Cell],
+                                           private val rowGroups: ArrayBuffer[Position],
+                                           private val colGroups: ArrayBuffer[Position]) {
 
-  private val rowPositions: Array[Position] = rowGroups.map(group => Position(group.length, group))
-  private val colPositions: Array[Position] = colGroups.map(group => Position(group.length, group))
 
-  def rows: Int = body.length
+  def cell(row: Int, col: Int): Cell = body(row*cols + col)
 
-  def cols: Int = body(0).length
+  def rowGroup(row: Int): Position = rowGroups(row)
 
-  def cell(row: Int, col: Int): Cell.Value = body(row)(col)
+  def colGroup(col: Int): Position = colGroups(col)
 
-  def rowGroup(row: Int): Array[Int] = rowGroups(row)
+  def fillCells(cells: Seq[Cell]): Unit = {
+    for (cell <- cells) {
+      body(cell.row*cols + cell.col) = Cell(cell.row, cell.col, filled = true)
+    }
+  }
 
-  def colGroup(col: Int): Array[Int] = colGroups(col)
+  private def getFilledColIndices(col: Int): Seq[Int] = {
+    for (i <- col to rows*cols by cols if body(i).filled) yield body(i).col
+  }
+
+  private def getFilledRowIndices(row: Int): Seq[Int] = {
+    for (i <- row*cols to row*cols + cols if body(i).filled) yield body(i).row
+  }
+
 
 }
 
 object NonogramField {
-  def apply(rows: Int, cols: Int): NonogramField = {
-    val body = Array.tabulate(rows, cols)((i, j) => if (i == j) Cell.FILLED else Cell.EMPTY)
-
-    val colGroups = for (i <- Array.range(0, cols)) yield {
-      val size = Random.nextInt(8) + 1
-      for (i <- Array.range(0, size)) yield Random.nextInt(cols - 2) + 1
-    }
-
-    val rowGroups = for (i <- Array.range(0, rows)) yield {
-      val size = Random.nextInt(8) + 1
-      for (i <- Array.range(0, size)) yield Random.nextInt(rows - 2) + 1
-    }
-
-    new NonogramField(body, rowGroups, colGroups)
-  }
-
   def apply(fileName: String): NonogramField = {
     val source = Source.fromResource(fileName)
     val lines = source.getLines().toArray
-    val rowGroup = for (i <- Array.range(1, lines(0).toInt + 1)) yield lines(i).split(" ").map(_.toInt)
-    val colGroup = for (i <- Array.range(rowGroup.length + 2, lines.length)) yield lines(i).split(" ").map(_.toInt)
-    val body = Array.tabulate(rowGroup.length, colGroup.length)((i, j) => Cell.EMPTY)
-    new NonogramField(body, rowGroup, colGroup)
+    val rows = lines(0).toInt
+    val rowGroup = new ArrayBuffer[Position](rows)
+    for (i <- 0 until rows) {
+      rowGroup(i) = Position(rows, lines(i + 1).split(" ").map(_.toInt))
+    }
+    val cols = lines(rows + 1).toInt
+    val colGroup = new ArrayBuffer[Position](cols)
+    for (i <- 0 until cols) {
+      colGroup(i) = Position(cols, lines(i + rows + 1).split(" ").map(_.toInt))
+    }
+    val body = new ArrayBuffer[Cell](rows * cols)
+    for (i <- 0 until rows*cols) {
+      body(i) = Cell(i / cols, i % cols)
+    }
+    new NonogramField(rows, cols, body, rowGroup, colGroup)
   }
 }
