@@ -12,15 +12,21 @@ class Position private[Position](val size: Int, val group: Array[Int], val varia
   }
 
   def filterVariants(markedIndexes: Seq[Int]): Position = {
-    val filteredVariants = variants.filter(variant => {
-      markedIndexes.forall(variant.contains(_))
-    })
-    new Position(size, group, filteredVariants)
+    if (variants.length == 1 && variants(0).sameElements(markedIndexes)) {
+      Position.EMPTY_POSITION
+    } else {
+      val filteredVariants = variants.filter(variant => {
+        markedIndexes.forall(variant.contains(_))
+      })
+      new Position(size, group, filteredVariants)
+    }
   }
 }
 
 object Position {
   type Variant = Array[Int]
+
+  val EMPTY_POSITION = new Position(0, Array(), Array())
 
   def apply(rowLength: Int, groups: Array[Int]): Position = {
     val variants: ArrayBuffer[Array[Int]] = new ArrayBuffer[Array[Int]]()
