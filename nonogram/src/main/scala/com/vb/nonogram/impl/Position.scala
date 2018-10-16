@@ -5,18 +5,23 @@ import com.vb.nonogram.impl.Position.Variant
 import scala.collection.mutable.ArrayBuffer
 
 
-class Position private[Position](val size: Int, val group: Array[Int], val variants: Array[Variant]) {
+class Position private[Position](val size: Int, val group: Seq[Int], val variants: Array[Variant]) {
 
   def getIntersection: Seq[Int] = {
     variants.reduceLeft((a, b) => a.intersect(b))
   }
 
-  def filterVariants(markedIndexes: Seq[Int]): Position = {
-    if (variants.length == 1 && variants(0).sameElements(markedIndexes)) {
-      Position.EMPTY_POSITION
+  def getDifference: Seq[Int] = {
+    val allVariants = variants.reduceLeft((a, b) => a.union(b))
+    (0 until size).diff(allVariants)
+  }
+
+  def filterVariants(filledIndexes: Seq[Int], crossedOutIndexes: Seq[Int]): Position = {
+    if (filledIndexes.isEmpty && crossedOutIndexes.isEmpty) {
+      this
     } else {
       val filteredVariants = variants.filter(variant => {
-        markedIndexes.forall(variant.contains(_))
+        (filledIndexes.isEmpty || filledIndexes.forall(variant.contains(_))) && (crossedOutIndexes.isEmpty || crossedOutIndexes.forall(!variant.contains(_)))
       })
       new Position(size, group, filteredVariants)
     }
@@ -26,21 +31,23 @@ class Position private[Position](val size: Int, val group: Array[Int], val varia
 object Position {
   type Variant = Array[Int]
 
-  val EMPTY_POSITION = new Position(0, Array(), Array())
+  val EMPTY_POSITION = new Position(0, Array[Int](), Array())
 
-  def apply(rowLength: Int, groups: Array[Int]): Position = {
+  def apply(rowLength: Int, groups: Seq[Int]): Position = {
     val variants: ArrayBuffer[Array[Int]] = new ArrayBuffer[Array[Int]]()
-    def computeVariant(group: Array[Int], startIndex: Int, endIndex: Int, currentVariant: Array[Int]): Unit = {
+
+    def computeVariant(group: Seq[Int], startIndex: Int, endIndex: Int, currentVariant: Array[Int]): Unit = {
       if (group.isEmpty) {
         variants.append(currentVariant)
       } else {
         val elemSum = group.map(_ + 1).sum - 1
         for (i <- startIndex to (endIndex - elemSum + 1)) {
           val increment = if (group.length == 1) 0 else 1
-          computeVariant(group.tail, i + group.head + increment, endIndex, currentVariant ++ Array.range(i, group(0) + i))
+          computeVariant(group.tail, i + group.head + increment, endIndex, currentVariant ++ Array.range(i, group.head + i))
         }
       }
     }
+
     computeVariant(groups, 0, rowLength - 1, Array())
     new Position(rowLength, groups, variants.toArray)
   }

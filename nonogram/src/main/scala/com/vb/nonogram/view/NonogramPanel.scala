@@ -15,14 +15,14 @@ class NonogramPanel(val field: NonogramField, val squareSize: Int) extends Panel
     val maxRowGroupSize = (for (i <- 0 until field.rowCount) yield field.rowGroup(i).length).max
     val maxColGroupSize = (for (i <- 0 until field.colCount) yield field.colGroup(i).length).max
 
-    val x0 = 10 + maxColGroupSize * squareSize
-    val y0 = 10 + maxRowGroupSize * squareSize
+    val x0 = 10 + maxRowGroupSize * squareSize
+    val y0 = 10 + maxColGroupSize * squareSize
 
     // horizontal lines
     for {i <- 0 to field.rowCount} {
       canvas.setStroke(new BasicStroke())
       canvas.setColor(Color.BLACK)
-      canvas.draw(new Line2D.Double(x0, y0 + i * squareSize, x0 + field.colCount * squareSize ,y0 + i * squareSize))
+      canvas.draw(new Line2D.Double(x0, y0 + i * squareSize, x0 + field.colCount * squareSize, y0 + i * squareSize))
     }
 
     //vertical lines

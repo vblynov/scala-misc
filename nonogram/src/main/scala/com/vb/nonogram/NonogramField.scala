@@ -8,9 +8,13 @@ trait NonogramField {
 
   def isFilled(row: Int, col: Int): Boolean
 
+  def isCrossedOut(row: Int, col: Int): Boolean
+
   def rowGroup(row: Int): Seq[Int]
 
   def colGroup(col: Int): Seq[Int]
 
   def fillCell(row: Int, col: Int): Boolean
+
+  def crossOutCell(row: Int, col: Int): Boolean
 }
