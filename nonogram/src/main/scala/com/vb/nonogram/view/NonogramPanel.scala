@@ -59,6 +59,8 @@ class NonogramPanel(val field: NonogramField, val squareSize: Int) extends Panel
     } {
       if (field.isFilled(i, j)) {
         canvas.setColor(Color.BLACK)
+      } else if (field.isCrossedOut(i, j)) {
+        canvas.setColor(Color.GRAY)
       } else {
         canvas.setColor(Color.WHITE)
       }

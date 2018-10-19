@@ -2,18 +2,20 @@ package com.vb.nonogram.impl
 
 import com.vb.nonogram.impl.Position.Variant
 
+import scala.collection.immutable.BitSet
 import scala.collection.mutable.ArrayBuffer
 
 
 class Position private[Position](val size: Int, val group: Seq[Int], val variants: Array[Variant]) {
+  private[this] val allIndexes = (0 until size).foldLeft(BitSet())(_ + _)
 
   def getIntersection: Seq[Int] = {
-    variants.reduceLeft((a, b) => a.intersect(b))
+    variants.reduceLeft((a, b) => a intersect b).toArray
   }
 
   def getDifference: Seq[Int] = {
     val allVariants = variants.reduceLeft((a, b) => a.union(b))
-    (0 until size).diff(allVariants)
+    allIndexes.diff(allVariants).toArray
   }
 
   def filterVariants(filledIndexes: Seq[Int], crossedOutIndexes: Seq[Int]): Position = {
@@ -21,7 +23,7 @@ class Position private[Position](val size: Int, val group: Seq[Int], val variant
       this
     } else {
       val filteredVariants = variants.filter(variant => {
-        (filledIndexes.isEmpty || filledIndexes.forall(variant.contains(_))) && (crossedOutIndexes.isEmpty || crossedOutIndexes.forall(!variant.contains(_)))
+        (filledIndexes.isEmpty || filledIndexes.forall(variant.contains)) && (crossedOutIndexes.isEmpty || crossedOutIndexes.forall(!variant.contains(_)))
       })
       new Position(size, group, filteredVariants)
     }
@@ -29,14 +31,14 @@ class Position private[Position](val size: Int, val group: Seq[Int], val variant
 }
 
 object Position {
-  type Variant = Array[Int]
+  type Variant = BitSet
 
   val EMPTY_POSITION = new Position(0, Array[Int](), Array())
 
   def apply(rowLength: Int, groups: Seq[Int]): Position = {
-    val variants: ArrayBuffer[Array[Int]] = new ArrayBuffer[Array[Int]]()
+    val variants: ArrayBuffer[Variant] = new ArrayBuffer[Variant]()
 
-    def computeVariant(group: Seq[Int], startIndex: Int, endIndex: Int, currentVariant: Array[Int]): Unit = {
+    def computeVariant(group: Seq[Int], startIndex: Int, endIndex: Int, currentVariant: Variant): Unit = {
       if (group.isEmpty) {
         variants.append(currentVariant)
       } else {
@@ -48,7 +50,7 @@ object Position {
       }
     }
 
-    computeVariant(groups, 0, rowLength - 1, Array())
+    computeVariant(groups, 0, rowLength - 1, BitSet())
     new Position(rowLength, groups, variants.toArray)
   }
 }
