@@ -35,7 +35,7 @@ lazy val dependencies =
   new {
     val scalacticV       = "3.0.5"
     val scalatestV       = "3.0.5"
-    val scalacheckV      = "1.13.5"
+    val scalacheckV      = "1.14.0"
 
     val scalactic    = "org.scalactic"   %% "scalactic"               % scalacticV
     val scalatest    = "org.scalatest"   %% "scalatest"               % scalatestV

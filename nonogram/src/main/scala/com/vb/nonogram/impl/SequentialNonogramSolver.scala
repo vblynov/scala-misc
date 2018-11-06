@@ -35,7 +35,7 @@ class SequentialNonogramSolver extends NonogramSolver {
       changedIndexes = changedIndexes ++
         (for (cell <- cellsToFill if field.fillCell(currentRow, cell)) yield cell) ++
         (for (cell <- cellsToCrossOut if field.crossOutCell(currentRow, cell)) yield cell)
-      if (currentPosition.variants.length == 1) {
+      if (currentPosition.getVariantsCount == 1) {
         positionGroup(currentRow) = Position.EMPTY_POSITION
       }
     }

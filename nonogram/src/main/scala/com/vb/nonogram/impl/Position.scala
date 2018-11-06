@@ -5,8 +5,7 @@ import com.vb.nonogram.impl.Position.Variant
 import scala.collection.immutable.BitSet
 import scala.collection.mutable.ArrayBuffer
 
-
-class Position private[Position](val size: Int, val group: Seq[Int], val variants: Array[Variant]) {
+class Position private[Position](private[this] val size: Int, private[this] val group: Seq[Int], private[this] val variants: Array[Variant]) {
   private[this] val allIndexes = (0 until size).foldLeft(BitSet())(_ + _)
 
   def getIntersection: Seq[Int] = {
@@ -17,6 +16,16 @@ class Position private[Position](val size: Int, val group: Seq[Int], val variant
     val allVariants = variants.reduceLeft((a, b) => a.union(b))
     allIndexes.diff(allVariants).toArray
   }
+
+  def getVariants: Seq[Seq[Int]] = {
+    variants.map(v => v.toIndexedSeq)
+  }
+
+  def getVariantsCount: Int = variants.length
+
+  def getSize: Int = size
+
+  def getGroup: Seq[Int] = group
 
   def filterVariants(filledIndexes: Seq[Int], crossedOutIndexes: Seq[Int]): Position = {
     if (filledIndexes.isEmpty && crossedOutIndexes.isEmpty) {
