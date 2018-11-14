@@ -9,12 +9,16 @@ class Position private[Position](private[this] val size: Int, private[this] val 
   private[this] val allIndexes = (0 until size).foldLeft(BitSet())(_ + _)
 
   def getIntersection: Seq[Int] = {
-    variants.reduceLeft((a, b) => a intersect b).toArray
+    if (variants.isEmpty) Array[Int]()
+    else variants.reduceLeft((a, b) => a intersect b).toArray
   }
 
   def getDifference: Seq[Int] = {
-    val allVariants = variants.reduceLeft((a, b) => a.union(b))
-    allIndexes.diff(allVariants).toArray
+    if (variants.isEmpty) Array[Int]()
+    else {
+      val allVariants = variants.reduceLeft((a, b) => a.union(b))
+      allIndexes.diff(allVariants).toArray
+    }
   }
 
   def getVariants: Seq[Seq[Int]] = {

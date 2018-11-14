@@ -5,41 +5,37 @@ import com.vb.nonogram.{NonogramField, NonogramSolver}
 class SequentialNonogramSolver extends NonogramSolver {
 
   def solve(field: NonogramField): NonogramField = {
-    val rowPositions = for (i <- (0 until field.rowCount).toArray) yield Position(field.colCount(), field.rowGroup(i))
-    val colPositions = for (i <- (0 until field.colCount).toArray) yield Position(field.rowCount(), field.colGroup(i))
-
-    val columnBasedField = new ColumnAccessFieldWrapper(field)
-
-    var changedIndexes: Set[Int] = Set() ++ (0 until field.rowCount)
-    while (changedIndexes.nonEmpty) {
-      println(changedIndexes)
-      // process rows
-      changedIndexes = solutionStep(field, field.colCount(), rowPositions, changedIndexes)
-      // process cols
-      changedIndexes = solutionStep(columnBasedField, field.rowCount(), colPositions, changedIndexes)
-    }
-    field
+    if (!field.isWrong && !field.isSolved) {
+      doSolve(field.converge())
+    } else field
   }
 
-  private def solutionStep(field: NonogramField, count: Int, positionGroup: Array[Position], indexes: Set[Int]): Set[Int] = {
-    var changedIndexes: Set[Int] = Set[Int]()
-    for (currentRow <- indexes if positionGroup(currentRow) != Position.EMPTY_POSITION) {
-      val filledCells = for (i <- 0 until count if field.isFilled(currentRow, i)) yield i
-      val crossedOutCells = for (i <- 0 until count if field.isCrossedOut(currentRow, i)) yield i
-
-      val currentPosition = positionGroup(currentRow).filterVariants(filledCells, crossedOutCells)
-      positionGroup(currentRow) = currentPosition
-
-      val cellsToFill = currentPosition.getIntersection
-      val cellsToCrossOut = currentPosition.getDifference
-      changedIndexes = changedIndexes ++
-        (for (cell <- cellsToFill if field.fillCell(currentRow, cell)) yield cell) ++
-        (for (cell <- cellsToCrossOut if field.crossOutCell(currentRow, cell)) yield cell)
-      if (currentPosition.getVariantsCount == 1) {
-        positionGroup(currentRow) = Position.EMPTY_POSITION
+  def doSolve(field: NonogramField): NonogramField = {
+    if (field.isSolved || field.isWrong) {
+      field
+    } else {
+      val pendingRowPositions = for (i <- 0 until field.rowCount if field.rowPosition(i) != Position.EMPTY_POSITION) yield (field.rowPosition(i), i, true)
+      val pendingColPositions = for (i <- 0 until field.colCount if field.colPosition(i) != Position.EMPTY_POSITION) yield (field.colPosition(i), i, false)
+      val mergedPositions = pendingRowPositions ++ pendingColPositions
+      if (mergedPositions.nonEmpty) {
+        val (position, row, isRow) = mergedPositions.minBy(_._1.getVariants.size)
+        if (isRow) {
+          for (varinat <- position.getVariants) {
+            val f = solve(field.applyRowVariant(row, varinat).converge())
+            if (f.isSolved) return f
+          }
+          field
+        } else {
+          for (varinat <- position.getVariants) {
+            val f = solve(field.applyColVariant(row, varinat).converge())
+            if (f.isSolved) return f
+          }
+          field
+        }
+      } else {
+        field
       }
     }
-    changedIndexes
   }
 
 }

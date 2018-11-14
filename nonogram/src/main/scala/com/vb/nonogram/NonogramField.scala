@@ -1,20 +1,33 @@
 package com.vb.nonogram
 
+import com.vb.nonogram.impl.Position
+
 trait NonogramField {
 
   def rowCount(): Int
 
   def colCount(): Int
 
-  def isFilled(row: Int, col: Int): Boolean
-
-  def isCrossedOut(row: Int, col: Int): Boolean
-
   def rowGroup(row: Int): Seq[Int]
 
   def colGroup(col: Int): Seq[Int]
 
-  def fillCell(row: Int, col: Int): Boolean
+  def isFilled(row: Int, col: Int): Boolean
 
-  def crossOutCell(row: Int, col: Int): Boolean
+  def isCrossedOut(row: Int, col: Int): Boolean
+
+  def rowPosition(row: Int): Position
+
+  def colPosition(col: Int): Position
+
+  def converge(): NonogramField
+
+  def isSolved: Boolean
+
+  def isWrong: Boolean
+
+  def applyRowVariant(row: Int, variant: Seq[Int]): NonogramField
+
+  def applyColVariant(col: Int, variant: Seq[Int]): NonogramField
+
 }
