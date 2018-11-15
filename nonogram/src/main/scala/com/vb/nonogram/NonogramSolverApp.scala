@@ -1,6 +1,7 @@
 package com.vb.nonogram
 
-import com.vb.nonogram.impl.{BasicNonogramField, SequentialNonogramSolver}
+import com.vb.nonogram.field.BasicNonogramField
+import com.vb.nonogram.solver.SequentialNonogramSolver
 import com.vb.nonogram.view.NonogramPanel
 
 import scala.swing.{Dimension, MainFrame, SimpleSwingApplication}

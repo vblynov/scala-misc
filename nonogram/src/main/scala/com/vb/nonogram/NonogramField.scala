@@ -1,6 +1,6 @@
 package com.vb.nonogram
 
-import com.vb.nonogram.impl.Position
+import com.vb.nonogram.field.Position
 
 trait NonogramField {
 

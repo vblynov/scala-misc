@@ -1,5 +1,6 @@
-package com.vb.nonogram.impl
+package com.vb.nonogram.solver
 
+import com.vb.nonogram.field.Position
 import com.vb.nonogram.{NonogramField, NonogramSolver}
 
 class SequentialNonogramSolver extends NonogramSolver {

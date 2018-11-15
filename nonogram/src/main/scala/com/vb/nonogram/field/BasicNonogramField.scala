@@ -1,4 +1,4 @@
-package com.vb.nonogram.impl
+package com.vb.nonogram.field
 
 import com.vb.nonogram.NonogramField
 
@@ -11,6 +11,9 @@ class BasicNonogramField private[BasicNonogramField](private[BasicNonogramField]
                                                      private[BasicNonogramField] val colGroups: IndexedSeq[IndexedSeq[Int]],
                                                      private[BasicNonogramField] val rowPositions: Array[Position],
                                                      private[BasicNonogramField] val colPositions: Array[Position]) extends NonogramField {
+
+  private[this] val rowAccessField = new RowAccessField(this)
+  private[this] val columnAccessField = new ColumnAccessField(this)
 
   override def rowGroup(row: Int): Seq[Int] = rowGroups(row)
 
@@ -30,16 +33,16 @@ class BasicNonogramField private[BasicNonogramField](private[BasicNonogramField]
 
   override def converge(): NonogramField = {
     var changedIndexes: Set[Int] = Set() ++ (0 until rows)
-    changedIndexes = convergeRows(changedIndexes)
+    changedIndexes = convergeDimension(rowAccessField, changedIndexes)
     if (changedIndexes.isEmpty) {
       changedIndexes = Set() ++ (0 until cols)
     }
-    changedIndexes = convergeCols(changedIndexes)
+    changedIndexes = convergeDimension(columnAccessField, changedIndexes)
     while (changedIndexes.nonEmpty) {
       // process rows
-      changedIndexes = convergeRows(changedIndexes)
+      changedIndexes = convergeDimension(rowAccessField, changedIndexes)
       // process cols
-      changedIndexes = convergeCols(changedIndexes)
+      changedIndexes = convergeDimension(columnAccessField, changedIndexes)
     }
     this
   }
@@ -74,66 +77,49 @@ class BasicNonogramField private[BasicNonogramField](private[BasicNonogramField]
     copyField
   }
 
-  private def fillCell(row: Int, col: Int): Boolean = if (body(row*cols + col) == 1) false else {
+  private[field] def fillCell(row: Int, col: Int): Boolean = if (body(row*cols + col) == 1) false else {
     body(row*cols + col) = 1
     true
   }
 
-  private def crossOutCell(row: Int, col: Int): Boolean = if (body(row*cols + col) != 0) false else {
+  private[field] def crossOutCell(row: Int, col: Int): Boolean = if (body(row*cols + col) != 0) false else {
     body(row*cols + col) = 2
     true
   }
 
-  private def convergeRows(indexes: Set[Int]): Set[Int] = {
+  private[field] def setRowPosition(positionIndex: Int, position: Position): Unit = {
+    rowPositions(positionIndex) = position
+  }
+
+  private[field] def setColPosition(positionIndex: Int, position: Position): Unit = {
+    colPositions(positionIndex) = position
+  }
+
+  private[this] def convergeDimension(field: FieldAccess, indexes: Set[Int]): Set[Int] = {
     var changedIndexes: Set[Int] = Set[Int]()
-    for (currentRow <- indexes if !(rowPositions(currentRow) eq Position.EMPTY_POSITION)) {
-      val filledCells = for (i <- 0 until cols if isFilled(currentRow, i)) yield i
-      val crossedOutCells = for (i <- 0 until cols if isCrossedOut(currentRow, i)) yield i
-      val currentPosition = rowPositions(currentRow).filterVariants(filledCells, crossedOutCells)
-      rowPositions(currentRow) = currentPosition
+    for (currentIndex <- indexes if !(field.position(currentIndex) eq Position.EMPTY_POSITION)) {
+      val filledCells = for (i <- 0 until field.count if field.isFilled(currentIndex, i)) yield i
+      val crossedOutCells = for (i <- 0 until field.count if field.isCrossedOut(currentIndex, i)) yield i
+      val currentPosition = field.position(currentIndex).filterVariants(filledCells, crossedOutCells)
+      field.setPosition(currentIndex, currentPosition)
       if (currentPosition.getVariantsCount == 1) {
         val variant = currentPosition.getVariants.head
         changedIndexes = changedIndexes ++
-          (for (i <- variant if fillCell(currentRow, i)) yield i) ++
-          (for (i <- 0 until cols if crossOutCell(currentRow, i)) yield i)
-        rowPositions(currentRow) = Position.EMPTY_POSITION
+          (for (i <- variant if field.fillCell(currentIndex, i)) yield i) ++
+          (for (i <- 0 until cols if field.crossOutCell(currentIndex, i)) yield i)
+        field.setPosition(currentIndex, Position.EMPTY_POSITION)
       } else {
         val cellsToFill = currentPosition.getIntersection
         val cellsToCrossOut = currentPosition.getDifference
         changedIndexes = changedIndexes ++
-          (for (cell <- cellsToFill if fillCell(currentRow, cell)) yield cell) ++
-          (for (cell <- cellsToCrossOut if crossOutCell(currentRow, cell)) yield cell)
+          (for (cell <- cellsToFill if field.fillCell(currentIndex, cell)) yield cell) ++
+          (for (cell <- cellsToCrossOut if field.crossOutCell(currentIndex, cell)) yield cell)
       }
     }
     changedIndexes
   }
 
-  private def convergeCols(indexes: Set[Int]): Set[Int] = {
-    var changedIndexes: Set[Int] = Set[Int]()
-    for (currentCol <- indexes if colPositions(currentCol) != Position.EMPTY_POSITION) {
-      val filledCells = for (i <- 0 until rows if isFilled(i, currentCol)) yield i
-      val crossedOutCells = for (i <- 0 until rows if isCrossedOut(i, currentCol)) yield i
-
-      val currentPosition = colPositions(currentCol).filterVariants(filledCells, crossedOutCells)
-      colPositions(currentCol) = currentPosition
-      if (currentPosition.getVariantsCount == 1) {
-        val variant = currentPosition.getVariants.head
-        changedIndexes = changedIndexes ++
-          (for (i <- variant if fillCell(i, currentCol)) yield i) ++
-          (for (i <- 0 until rows if crossOutCell(i, currentCol)) yield i)
-        colPositions(currentCol) = Position.EMPTY_POSITION
-      } else {
-        val cellsToFill = currentPosition.getIntersection
-        val cellsToCrossOut = currentPosition.getDifference
-        changedIndexes = changedIndexes ++
-          (for (cell <- cellsToFill if fillCell(cell, currentCol)) yield cell) ++
-          (for (cell <- cellsToCrossOut if crossOutCell(cell, currentCol)) yield cell)
-      }
-    }
-    changedIndexes
-  }
-
-  private def copy: BasicNonogramField = {
+  private[this] def copy: BasicNonogramField = {
       val newBody = for (i <- body.indices.toArray) yield body(i)
       val newRowPositions = for (i <- rowPositions.indices.toArray) yield rowPositions(i)
       val newColPositions = for (i <- colPositions.indices.toArray) yield colPositions(i)

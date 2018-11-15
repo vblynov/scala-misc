@@ -1,6 +1,6 @@
-package com.vb.nonogram.impl
+package com.vb.nonogram.field
 
-import com.vb.nonogram.impl.Position.Variant
+import com.vb.nonogram.field.Position.Variant
 
 import scala.collection.immutable.BitSet
 import scala.collection.mutable.ArrayBuffer

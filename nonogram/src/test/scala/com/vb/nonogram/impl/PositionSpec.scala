@@ -2,6 +2,7 @@ package com.vb.nonogram.impl
 
 import org.scalacheck._
 import Prop.forAll
+import com.vb.nonogram.field.Position
 
 object PositionSpec extends Properties("Position") {
 
