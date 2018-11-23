@@ -20,19 +20,11 @@ class SequentialNonogramSolver extends NonogramSolver {
       val mergedPositions = pendingRowPositions ++ pendingColPositions
       if (mergedPositions.nonEmpty) {
         val (position, row, isRow) = mergedPositions.minBy(_._1.getVariants.size)
-        if (isRow) {
-          for (variant <- position.getVariants) {
-            val f = solve(field.applyRowVariant(row, variant))
-            if (f.isSolved) return f
-          }
-          field
-        } else {
-          for (variant <- position.getVariants) {
-            val f = solve(field.applyColVariant(row, variant))
-            if (f.isSolved) return f
-          }
-          field
+        for (variant <- position.getVariants) {
+          val f = if (isRow) solve(field.applyRowVariant(row, variant)) else solve(field.applyColVariant(row, variant))
+          if (f.isSolved) return f
         }
+        field
       } else {
         field
       }

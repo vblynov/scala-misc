@@ -8,7 +8,7 @@ import scala.swing.{Dimension, MainFrame, SimpleSwingApplication}
 
 object NonogramSolverApp extends SimpleSwingApplication {
 
-  val data = BasicNonogramField("oneStar1.txt")
+  val data = BasicNonogramField("fiveStar2.txt")
   val solver: NonogramSolver = new SequentialNonogramSolver
   val solution: NonogramField = solver.solve(data)
 

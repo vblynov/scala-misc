@@ -73,7 +73,6 @@ class BasicNonogramField private[BasicNonogramField](val rows: Int,
 
   private[BasicNonogramField] def converge(): Unit = {
     Stream.iterate(allRows)(indexes => {
-      println(indexes)
       val changedRows = convergeDimension(rowAccessField, indexes)
       if (changedRows.isEmpty) convergeDimension(columnAccessField, allCols)
       else convergeDimension(columnAccessField, changedRows)
