@@ -11,7 +11,7 @@ private class RowAccessField(field: BasicNonogramField) extends FieldAccess {
 
   override def crossOutCell(row: Int, col: Int): Boolean = field.crossOutCell(row, col)
 
-  override def count: Int = field.colCount()
+  override def count: Int = field.cols
 
   override def setPosition(positionIndex: Int, position: Position): Unit = field.setRowPosition(positionIndex, position)
 }

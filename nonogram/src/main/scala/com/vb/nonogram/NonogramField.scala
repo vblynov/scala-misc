@@ -4,9 +4,9 @@ import com.vb.nonogram.field.Position
 
 trait NonogramField {
 
-  def rowCount(): Int
+  def rows: Int
 
-  def colCount(): Int
+  def cols: Int
 
   def rowGroup(row: Int): Seq[Int]
 
@@ -19,8 +19,6 @@ trait NonogramField {
   def rowPosition(row: Int): Position
 
   def colPosition(col: Int): Position
-
-  def converge(): NonogramField
 
   def isSolved: Boolean
 
