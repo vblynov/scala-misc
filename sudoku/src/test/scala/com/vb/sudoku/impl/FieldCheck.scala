@@ -40,13 +40,13 @@ object FieldSpecification extends Commands {
 
   def genSetValue(state: State): Gen[SetValue] = for (
     row <- Gen.choose(0, SIZE - 1);
-    col <- Gen.choose(0, SIZE - 1);
+    col <- Gen.oneOf(for (i <- row * SIZE until (row + 1) * SIZE if state.body(i) == 0) yield i % SIZE);
     value <- Gen.choose(1, SIZE) suchThat(v => notInRow(state.body, row, v) && notInCol(state.body, col, v) && notInSector(state.body, row, col, v))
   ) yield SetValue(row, col, value)
 
   override def genCommand(state: State): Gen[Command] = Gen.frequency((3, genSetValue(state)), (1, Gen.const(Reset())))
 
-  def notInRow(body: Array[Int], row: Int, value: Int): Boolean = !(for (i <- row * SIZE until row * SIZE + SIZE) yield body(i)).contains(value)
+  def notInRow(body: Array[Int], row: Int, value: Int): Boolean = !(for (i <- row * SIZE until (row + 1)* SIZE) yield body(i)).contains(value)
 
   def notInCol(body: Array[Int], col: Int, value: Int): Boolean =  !(for (i <- col to SIZE * (SIZE - 1) + col by SIZE) yield body(i)).contains(value)
 
