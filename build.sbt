@@ -1,5 +1,5 @@
 name := "scala-misc"
-organization in ThisBuild := "com.vb"
+organization in ThisBuild := "com.vbl"
 scalaVersion in ThisBuild := "2.12.6"
 version in ThisBuild := "0.1"
 
